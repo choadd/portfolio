@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="board">
+	<select id="selectAll" resultType="board">
+		select
+			no,
+			writer,
+			title,
+			content,
+			writedate
+		from board
+	</select>
+	<insert id="insertOne" parameterType="board">
+		insert into
+		board
+			(no,writer,title,content,writedate)
+		values
+			(board_seq.nextval,#{writer},#{title},#{content},SYSDATE)
+	</insert>
+	<delete id="deleteById">
+		delete
+		from
+		  	board 
+		where 
+			no=#{no}
+	</delete>
+	<update id="updateById" parameterType="board">
+		update
+			board
+		set
+			writer = #{writer},
+			title = #{title} ,
+			content=#{content}
+		where
+			no=#{no}
+	</update>
+	<select id="selectOne" resultType="board" parameterType="int">
+		select
+			*
+		from
+			board
+		where
+			no=#{no}
+	</select>
+	<select id ="selectPage" resultType="board" parameterType="int">
+	<![CDATA[
+		select 
+			RN,
+			no,
+			writer,
+			title,
+			content,
+			TO_CHAR(writedate,'yyyy-mm-dd') as writedate
+			from
+				(select /*+ INDEX_DESC(BOARD board_pk)*/
+				 ROWNUM RN,no,writer, title, content,writedate 
+				from 
+					board 
+				where 
+					ROWNUM > 0 and ROWNUM <= (select count(*) from board))
+		where #{pageStart}+10 >= RN AND RN > #{pageStart}
+		]]>
+	</select>
+	<select id="countBoard" resultType="int">
+		select 
+			count(*) 
+		from 
+			board
+	</select>
+	<select id="prevAndNext" resultType="prevNext">
+		<![CDATA[
+		select * from
+    		(select
+        		LAG(NO) OVER(ORDER BY NO) AS PREV,
+        		NO,
+        		LEAD(NO) OVER(ORDER BY NO)AS NEXT
+ 			FROM BOARD)
+		where NO = #{no}
+		]]>
+	</select>
+	<select id="searchTitle" resultType="board" parameterType="net.edupoll.kr.entity.SearchKeyword">
+		SELECT
+			 *
+		FROM
+			BOARD
+		WHERE 
+			${column} 
+			LIKE 
+			#{keyword}||'%'
+	</select>
+</mapper>

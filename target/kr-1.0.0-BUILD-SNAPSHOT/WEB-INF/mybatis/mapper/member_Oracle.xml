@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="member">
+	<select id="selectMemberList" resultType="member">
+		SELECT
+			NO,
+			ID,
+			PASSWORD,
+			NAME,
+			EMAIL,
+			JOINDATE
+		FROM
+			MEMBER
+	</select>
+	<insert id="joinMember" parameterType="member">
+		INSERT INTO
+		MEMBER
+			(NO, ID, PASSWORD, NAME, EMAIL, JOINDATE)
+		VALUES
+			(member_seq.nextval, #{id} ,#{password} ,#{name}, #{email} ,to_char(SYSDATE,'yyMMdd'))
+	</insert>
+	<delete id="deleteByIdMember">
+		DELETE 
+		FROM
+			MEMBER
+		WHERE
+			ID = #{ID}
+	</delete>
+	<select id="loginNickname" parameterType="member" resultType="String">
+		SELECT
+			NAME
+		FROM
+			MEMBER
+		WHERE
+			ID=#{id} 
+			and
+			PASSWORD=#{password}
+	</select>
+	<select id="admin" parameterType="member" resultType="String">
+		SELECT
+			NAME
+		FROM
+			MEMBER
+		WHERE
+			ID=#{id}
+	</select>
+	<update id="updateById"></update>
+
+</mapper>

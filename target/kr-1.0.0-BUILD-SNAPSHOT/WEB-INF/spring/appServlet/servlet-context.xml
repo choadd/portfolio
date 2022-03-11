@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans
+	xsi:schemaLocation="http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd"
+	xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns="http://www.springframework.org/schema/beans">
+	<context:component-scan
+		base-package="net.edupoll.kr" />
+	<mvc:annotation-driven />
+	<mvc:default-servlet-handler />
+	<mvc:resources cache-period="60" mapping="/**"
+		location="/resources/" />
+
+	<bean
+		class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+		<property value="/WEB-INF/views/" name="prefix" />
+		<property value=".jsp" name="suffix" />
+	</bean>
+
+	<!-- DataSource 설정 -->
+	<bean
+		class="org.springframework.jdbc.datasource.DriverManagerDataSource"
+		id="old.ds">
+		<property value="oracle.jdbc.driver.OracleDriver"
+			name="driverClassName" />
+		<property value="jdbc:oracle:thin:@localhost:1521:xe"
+			name="url" />
+		<property value="jun" name="username" />
+		<property value="0000" name="password" />
+	</bean>
+	<bean class="org.apache.commons.dbcp2.BasicDataSource" id="ds"
+		destroy-method="close">
+		<property value="oracle.jdbc.driver.OracleDriver"
+			name="driverClassName" />
+		<property value="jdbc:oracle:thin:@localhost:1521:xe"
+			name="url" />
+		<property value="jun" name="username" />
+		<property value="0000" name="password" />
+	</bean>
+	<!-- myBatis 설정 -->
+	<bean class="org.mybatis.spring.SqlSessionFactoryBean"
+		id="factory">
+		<property name="dataSource" ref="ds" />
+		<property value="/WEB-INF/mybatis/config.xml"
+			name="configLocation" />
+		<property value="/WEB-INF/mybatis/mapper/*_Oracle.xml"
+			name="mapperLocations" />
+	</bean>
+	<bean class="org.mybatis.spring.SqlSessionTemplate"
+		id="sqlSession">
+		<constructor-arg name="sqlSessionFactory"
+			ref="factory" />
+	</bean>
+
+	<!-- 인터셉터 -->
+	<!-- <mvc:interceptors> <mvc:interceptor> <mvc:mapping path="/**" /> <mvc:exclude-mapping 
+		path="/"/> <bean class="net.edupoll.kr.intercepter.RequestInterceptor"></bean> 
+		</mvc:interceptor> <mvc:interceptor> <mvc:mapping path="/auth/**" /> <mvc:exclude-mapping 
+		path="/auth/*"/> <bean class="net.edupoll.kr.intercepter.TestInterceptor"></bean> 
+		</mvc:interceptor> </mvc:interceptors> -->
+
+	<!-- multipart 요청 처리위해서 추가 설정 필요 -->
+	<bean
+		class="org.springframework.web.multipart.commons.CommonsMultipartResolver"
+		id="multipartResolver">
+		<property name="maxUploadSize" value="104857600" />
+		<property name="maxUploadSizePerFile" value="20971520" />
+		<property name="uploadTempDir" value="/temp"></property>
+	</bean>
+
+</beans>
